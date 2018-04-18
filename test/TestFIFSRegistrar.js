@@ -1,5 +1,5 @@
 const FIFSRegistrar = artifacts.require('FIFSRegistrar.sol');
-const ENS = artifacts.require('ENSRegistry.sol');
+const ENS = artifacts.require('WNSRegistry.sol');
 
 const utils = require('./helpers/Utils.js');
 const web3Utils = require('web3-utils');

@@ -1,20 +1,17 @@
 {
-  "name": "ens",
+  "name": "wns",
   "version": "0.1.1",
-  "description": "Implementations for registrars and local resolvers for the Ethereum Name Service",
+  "description": "Implementations for registrars and local resolvers for the Wanchain Name Service(fork from https://github.com/ethereum/ens.git), thx great work",
   "scripts": {
     "test": "truffle test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Arachnid/ens.git"
+    "url": "git+https://github.com/wanchain/wns.git"
   },
   "author": "Nick Johnson <nick@ethereum.org>",
   "license": "CC0-1.0",
-  "bugs": {
-    "url": "https://github.com/Arachnid/ens/issues"
-  },
-  "homepage": "https://github.com/Arachnid/ens#readme",
+  "homepage": "https://github.com/wanchain/ens#readme",
   "dependencies": {
     "ganache-cli": "^6.1.0",
     "testrpc": "0.0.1",

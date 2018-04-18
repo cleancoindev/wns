@@ -10,7 +10,7 @@ contract DefaultReverseResolver is Resolver {
     // namehash('addr.reverse')
     bytes32 constant ADDR_REVERSE_NODE = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
 
-    ENS public ens;
+    WNS public wns;
     mapping (bytes32 => string) public name;
 
     /**
@@ -18,19 +18,19 @@ contract DefaultReverseResolver is Resolver {
      * @param node The node permission is required for.
      */
     modifier owner_only(bytes32 node) {
-        require(msg.sender == ens.owner(node));
+        require(msg.sender == wns.owner(node));
         _;
     }
 
     /**
      * @dev Constructor
-     * @param ensAddr The address of the ENS registry.
+     * @param wnsAddr The address of the WNS registry.
      */
-    function DefaultReverseResolver(ENS ensAddr) public {
-        ens = ensAddr;
+    function DefaultReverseResolver(WNS wnsAddr) public {
+        wns = wnsAddr;
 
         // Assign ownership of the reverse record to our deployer
-        ReverseRegistrar registrar = ReverseRegistrar(ens.owner(ADDR_REVERSE_NODE));
+        ReverseRegistrar registrar = ReverseRegistrar(wns.owner(ADDR_REVERSE_NODE));
         if (address(registrar) != 0) {
             registrar.claim(msg.sender);
         }

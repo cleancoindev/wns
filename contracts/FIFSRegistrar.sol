@@ -1,27 +1,27 @@
 pragma solidity ^0.4.18;
 
-import './ENS.sol';
+import './WNS.sol';
 
 /**
  * A registrar that allocates subdomains to the first person to claim them.
  */
 contract FIFSRegistrar {
-    ENS ens;
+    WNS wns;
     bytes32 rootNode;
 
     modifier only_owner(bytes32 subnode) {
-        address currentOwner = ens.owner(keccak256(rootNode, subnode));
+        address currentOwner = wns.owner(keccak256(rootNode, subnode));
         require(currentOwner == 0 || currentOwner == msg.sender);
         _;
     }
 
     /**
      * Constructor.
-     * @param ensAddr The address of the ENS registry.
+     * @param wnsAddr The address of the WNS registry.
      * @param node The node that this registrar administers.
      */
-    function FIFSRegistrar(ENS ensAddr, bytes32 node) public {
-        ens = ensAddr;
+    function FIFSRegistrar(WNS wnsAddr, bytes32 node) public {
+        wns = wnsAddr;
         rootNode = node;
     }
 
@@ -31,6 +31,6 @@ contract FIFSRegistrar {
      * @param owner The address of the new owner.
      */
     function register(bytes32 subnode, address owner) public only_owner(subnode) {
-        ens.setSubnodeOwner(rootNode, subnode, owner);
+        wns.setSubnodeOwner(rootNode, subnode, owner);
     }
 }

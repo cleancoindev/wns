@@ -1,4 +1,4 @@
-const ENS = artifacts.require('ENSRegistry.sol');
+const ENS = artifacts.require('WNSRegistry.sol');
 const PublicResolver = artifacts.require('PublicResolver.sol');
 
 const utils = require('./helpers/Utils.js');

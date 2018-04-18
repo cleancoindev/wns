@@ -1,4 +1,4 @@
-const ENS = artifacts.require("./ENSRegistry.sol");
+const WNS = artifacts.require("./WNSRegistry.sol");
 const FIFSRegistrar = artifacts.require('./FIFSRegistrar.sol');
 
 // Currently the parameter('./ContractName') is only used to imply
@@ -22,7 +22,7 @@ function getRootNodeFromTLD(tld) {
 }
 
 /**
- * Deploy the ENS and FIFSRegistrar
+ * Deploy the WNS and FIFSRegistrar
  *
  * @param {Object} deployer truffle deployer helper
  * @param {string} tld tld which the FIFS registrar takes charge of
@@ -30,20 +30,20 @@ function getRootNodeFromTLD(tld) {
 function deployFIFSRegistrar(deployer, tld) {
   var rootNode = getRootNodeFromTLD(tld);
 
-  // Deploy the ENS first
-  deployer.deploy(ENS)
+  // Deploy the WNS first
+  deployer.deploy(WNS)
     .then(() => {
-      // Deploy the FIFSRegistrar and bind it with ENS
-      return deployer.deploy(FIFSRegistrar, ENS.address, rootNode.namehash);
+      // Deploy the FIFSRegistrar and bind it with WNS
+      return deployer.deploy(FIFSRegistrar, WNS.address, rootNode.namehash);
     })
     .then(function() {
       // Transfer the owner of the `rootNode` to the FIFSRegistrar
-      ENS.at(ENS.address).setSubnodeOwner('0x0', rootNode.sha3, FIFSRegistrar.address);
+      WNS.at(WNS.address).setSubnodeOwner('0x0', rootNode.sha3, FIFSRegistrar.address);
     });
 }
 
 /**
- * Deploy the ENS and HashRegistrar(Simplified)
+ * Deploy the WNS and HashRegistrar(Simplified)
  *
  * @param {Object} deployer truffle deployer helper
  * @param {string} tld tld which the Hash registrar takes charge of
@@ -51,16 +51,16 @@ function deployFIFSRegistrar(deployer, tld) {
 function deployAuctionRegistrar(deployer, tld) {
   var rootNode = getRootNodeFromTLD(tld);
 
-  // Deploy the ENS first
-  deployer.deploy(ENS)
+  // Deploy the WNS first
+  deployer.deploy(WNS)
     .then(() => {
-      // Deploy the HashRegistrar and bind it with ENS
+      // Deploy the HashRegistrar and bind it with WNS
       // The last argument `0` specifies the auction start date to `now`
-      return deployer.deploy(Registrar, ENS.address, rootNode.namehash, 0);
+      return deployer.deploy(Registrar, WNS.address, rootNode.namehash, 0);
     })
     .then(function() {
       // Transfer the owner of the `rootNode` to the HashRegistrar
-      ENS.at(ENS.address).setSubnodeOwner('0x0', rootNode.sha3, Registrar.address);
+      WNS.at(WNS.address).setSubnodeOwner('0x0', rootNode.sha3, Registrar.address);
     });
 }
 

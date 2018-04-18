@@ -14,7 +14,7 @@ The plan is to test the basic features and then move to a new contract in at mos
 */
 
 
-import './ENS.sol';
+import './WNS.sol';
 import './Deed.sol';
 
 /**
@@ -22,7 +22,7 @@ import './Deed.sol';
  * @dev The registrar handles the auction process for each subnode of the node it owns.
  */
 contract Registrar {
-    ENS public ens;
+    WNS public wns;
     bytes32 public rootNode;
 
     mapping (bytes32 => Entry) _entries;
@@ -62,18 +62,18 @@ contract Registrar {
     }
 
     modifier registryOpen() {
-        require(now >= registryStarted && now <= registryStarted + 4 years && ens.owner(rootNode) == address(this));
+        require(now >= registryStarted && now <= registryStarted + 4 years && wns.owner(rootNode) == address(this));
         _;
     }
 
     /**
      * @dev Constructs a new Registrar, with the provided address as the owner of the root node.
      *
-     * @param _ens The address of the ENS
+     * @param _wns The address of the WNS
      * @param _rootNode The hash of the rootnode.
      */
-    function Registrar(ENS _ens, bytes32 _rootNode, uint _startDate) public {
-        ens = _ens;
+    function Registrar(WNS _wns, bytes32 _rootNode, uint _startDate) public {
+        wns = _wns;
         rootNode = _rootNode;
         registryStarted = _startDate > 0 ? _startDate : now;
     }
@@ -267,7 +267,7 @@ contract Registrar {
         Entry storage h = _entries[_hash];
         Deed deedContract = h.deed;
 
-        require(now >= h.registrationDate + 1 years || ens.owner(rootNode) != address(this));
+        require(now >= h.registrationDate + 1 years || wns.owner(rootNode) != address(this));
 
         h.value = 0;
         h.highestBid = 0;
@@ -336,7 +336,7 @@ contract Registrar {
      * @param _hash The name hash to transfer.
      */
     function transferRegistrars(bytes32 _hash) public onlyOwner(_hash) {
-        address registrar = ens.owner(rootNode);
+        address registrar = wns.owner(rootNode);
         require(registrar != address(this));
 
         // Migrate the deed
@@ -427,7 +427,7 @@ contract Registrar {
      *
      * @param hash The node corresponding to the desired namehash
      * @param value The bid amount
-     * @param salt A random value to ensure secrecy of the bid
+     * @param salt A random value to wnsure secrecy of the bid
      * @return The hash of the bid values
      */
     function shaBid(bytes32 hash, address owner, uint value, bytes32 salt) public pure returns (bytes32) {
@@ -435,17 +435,17 @@ contract Registrar {
     }
 
     function _tryEraseSingleNode(bytes32 label) internal {
-        if (ens.owner(rootNode) == address(this)) {
-            ens.setSubnodeOwner(rootNode, label, address(this));
+        if (wns.owner(rootNode) == address(this)) {
+            wns.setSubnodeOwner(rootNode, label, address(this));
             bytes32 node = keccak256(rootNode, label);
-            ens.setResolver(node, 0);
-            ens.setOwner(node, 0);
+            wns.setResolver(node, 0);
+            wns.setOwner(node, 0);
         }
     }
 
     function _eraseNodeHierarchy(uint idx, bytes32[] labels, bytes32 node) internal {
         // Take ownership of the node
-        ens.setSubnodeOwner(node, labels[idx], address(this));
+        wns.setSubnodeOwner(node, labels[idx], address(this));
         node = keccak256(node, labels[idx]);
 
         // Recurse if there are more labels
@@ -454,19 +454,19 @@ contract Registrar {
         }
 
         // Erase the resolver and owner records
-        ens.setResolver(node, 0);
-        ens.setOwner(node, 0);
+        wns.setResolver(node, 0);
+        wns.setOwner(node, 0);
     }
 
     /**
-     * @dev Assign the owner in ENS, if we're still the registrar
+     * @dev Assign the owner in WNS, if we're still the registrar
      *
      * @param _hash hash to change owner
      * @param _newOwner new owner to transfer to
      */
     function trySetSubnodeOwner(bytes32 _hash, address _newOwner) internal {
-        if (ens.owner(rootNode) == address(this))
-            ens.setSubnodeOwner(rootNode, _hash, _newOwner);
+        if (wns.owner(rootNode) == address(this))
+            wns.setSubnodeOwner(rootNode, _hash, _newOwner);
     }
 
     /**

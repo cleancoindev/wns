@@ -1,6 +1,6 @@
 const DefaultReverseResolver = artifacts.require('DefaultReverseResolver.sol');
 const ReverseRegistrar = artifacts.require('ReverseRegistrar.sol');
-const ENS = artifacts.require('ENSRegistry.sol');
+const ENS = artifacts.require('WNSRegistry.sol');
 
 const utils = require('./helpers/Utils.js');
 const namehash = require('eth-ens-namehash');
