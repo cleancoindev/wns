@@ -21,7 +21,7 @@
   (def 'return-data 0x40) ; Data returned from called contract.
 
   ;; Storage layout.
-  (def 'ens-registry 0x00) ; Address of ens registry.
+  (def 'wns-registry 0x00) ; Address of wns registry.
 
   ;; Precomputed function IDs.
   (def 'supports-interface 0x01ffc9a7) ; supportsInterface(bytes4)
@@ -106,8 +106,8 @@
       (mstore (+ call-data 0x00) (shift-left get-node-owner))
       (mstore (+ call-data 0x04) node)
 
-      ;; Call ens.owner(node). Bail on fail.
-      (when (= false (call (gas) 0 @@ens-registry call-data 36 return-data 32))
+      ;; Call wns.owner(node). Bail on fail.
+      (when (= false (call (gas) 0 @@wns-registry call-data 36 return-data 32))
         (jump invalid-location))
 
       ;; If the caller isn't the current node owner, throw an exception.
@@ -119,7 +119,7 @@
 
   ;; Store the constructor parameter.
   (codecopy scratch (bytecodesize) 32)
-  (sstore ens-registry @scratch)
+  (sstore wns-registry @scratch)
 
   ;; --------------------------------------------------------------------------
   ;; CODE
@@ -146,8 +146,8 @@
           (return scratch 32)))
 
       ;; ----------------------------------------------------------------------
-      ;; @notice Returns the address associated with an ENS node.
-      ;; @param node The ENS node to query.
+      ;; @notice Returns the address associated with an WNS node.
+      ;; @param node The WNS node to query.
       ;; @return The associated address.
 
       (def 'node (calldataload 0x04))
@@ -162,8 +162,8 @@
           (return scratch 32)))
 
       ;; ----------------------------------------------------------------------
-      ;; @notice Sets the address associated with an ENS node. May only be
-      ;;         called by the owner of that node in the ENS registry.
+      ;; @notice Sets the address associated with an WNS node. May only be
+      ;;         called by the owner of that node in the WNS registry.
       ;; @param node The node to update.
       ;; @param addr The address to set.
 
@@ -179,10 +179,10 @@
           (stop)))
 
       ;; ----------------------------------------------------------------------
-      ;; @notice Returns the content hash associated with an ENS node. Note
+      ;; @notice Returns the content hash associated with an WNS node. Note
       ;;         that this resource type is not standardized, and will likely
       ;;         change in future to a resource type based on multihash.
-      ;; @param node The ENS node to query.
+      ;; @param node The WNS node to query.
       ;; @return The associated content hash.
 
       (def 'node (calldataload 0x04))
@@ -197,8 +197,8 @@
           (return scratch 32)))
 
       ;; ----------------------------------------------------------------------
-      ;; @notice Sets the hash associated with an ENS node. May only be
-      ;;         called by the owner of that node in the ENS registry. Note
+      ;; @notice Sets the hash associated with an WNS node. May only be
+      ;;         called by the owner of that node in the WNS registry. Note
       ;;         that this resource type is not standardized, and will likely
       ;;         change in future to a resource type based on multihash.
       ;; @param node The node to update.

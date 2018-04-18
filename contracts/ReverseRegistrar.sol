@@ -1,6 +1,6 @@
 pragma solidity ^0.4.10;
 
-import "./ENS.sol";
+import "./WNS.sol";
 
 contract Resolver {
     function setName(bytes32 node, string name) public;
@@ -10,71 +10,71 @@ contract ReverseRegistrar {
     // namehash('addr.reverse')
     bytes32 constant ADDR_REVERSE_NODE = 0x91d1777781884d03a6757a803996e38de2a42967fb37eeaca72729271025a9e2;
 
-    ENS public ens;
+    WNS public wns;
     Resolver public defaultResolver;
 
     /**
      * @dev Constructor
-     * @param ensAddr The address of the ENS registry.
+     * @param wnsAddr The address of the WNS registry.
      * @param resolverAddr The address of the default reverse resolver.
      */
-    function ReverseRegistrar(ENS ensAddr, Resolver resolverAddr) public {
-        ens = ensAddr;
+    function ReverseRegistrar(WNS wnsAddr, Resolver resolverAddr) public {
+        wns = wnsAddr;
         defaultResolver = resolverAddr;
 
         // Assign ownership of the reverse record to our deployer
-        ReverseRegistrar oldRegistrar = ReverseRegistrar(ens.owner(ADDR_REVERSE_NODE));
+        ReverseRegistrar oldRegistrar = ReverseRegistrar(wns.owner(ADDR_REVERSE_NODE));
         if (address(oldRegistrar) != 0) {
             oldRegistrar.claim(msg.sender);
         }
     }
     
     /**
-     * @dev Transfers ownership of the reverse ENS record associated with the
+     * @dev Transfers ownership of the reverse WNS record associated with the
      *      calling account.
-     * @param owner The address to set as the owner of the reverse record in ENS.
-     * @return The ENS node hash of the reverse record.
+     * @param owner The address to set as the owner of the reverse record in WNS.
+     * @return The WNS node hash of the reverse record.
      */
     function claim(address owner) public returns (bytes32) {
         return claimWithResolver(owner, 0);
     }
 
     /**
-     * @dev Transfers ownership of the reverse ENS record associated with the
+     * @dev Transfers ownership of the reverse WNS record associated with the
      *      calling account.
-     * @param owner The address to set as the owner of the reverse record in ENS.
+     * @param owner The address to set as the owner of the reverse record in WNS.
      * @param resolver The address of the resolver to set; 0 to leave unchanged.
-     * @return The ENS node hash of the reverse record.
+     * @return The WNS node hash of the reverse record.
      */
     function claimWithResolver(address owner, address resolver) public returns (bytes32) {
         var label = sha3HexAddress(msg.sender);
         bytes32 node = keccak256(ADDR_REVERSE_NODE, label);
-        var currentOwner = ens.owner(node);
+        var currentOwner = wns.owner(node);
 
         // Update the resolver if required
-        if (resolver != 0 && resolver != ens.resolver(node)) {
+        if (resolver != 0 && resolver != wns.resolver(node)) {
             // Transfer the name to us first if it's not already
             if (currentOwner != address(this)) {
-                ens.setSubnodeOwner(ADDR_REVERSE_NODE, label, this);
+                wns.setSubnodeOwner(ADDR_REVERSE_NODE, label, this);
                 currentOwner = address(this);
             }
-            ens.setResolver(node, resolver);
+            wns.setResolver(node, resolver);
         }
 
         // Update the owner if required
         if (currentOwner != owner) {
-            ens.setSubnodeOwner(ADDR_REVERSE_NODE, label, owner);
+            wns.setSubnodeOwner(ADDR_REVERSE_NODE, label, owner);
         }
 
         return node;
     }
 
     /**
-     * @dev Sets the `name()` record for the reverse ENS record associated with
+     * @dev Sets the `name()` record for the reverse WNS record associated with
      * the calling account. First updates the resolver to the default reverse
      * resolver if necessary.
      * @param name The name to set for this address.
-     * @return The ENS node hash of the reverse record.
+     * @return The WNS node hash of the reverse record.
      */
     function setName(string name) public returns (bytes32) {
         bytes32 node = claimWithResolver(this, defaultResolver);
@@ -85,7 +85,7 @@ contract ReverseRegistrar {
     /**
      * @dev Returns the node hash for a given account's reverse records.
      * @param addr The address to hash
-     * @return The ENS node hash.
+     * @return The WNS node hash.
      */
     function node(address addr) public view returns (bytes32) {
         return keccak256(ADDR_REVERSE_NODE, sha3HexAddress(addr));

@@ -1,11 +1,11 @@
 pragma solidity ^0.4.18;
 
-import './ENS.sol';
+import './WNS.sol';
 
 /**
- * The ENS registry contract.
+ * The WNS registry contract.
  */
-contract ENSRegistry is ENS {
+contract WNSRegistry is WNS {
     struct Record {
         address owner;
         address resolver;
@@ -21,9 +21,9 @@ contract ENSRegistry is ENS {
     }
 
     /**
-     * @dev Constructs a new ENS registrar.
+     * @dev Constructs a new WNS registrar.
      */
-    function ENSRegistry() public {
+    function WNSRegistry() public {
         records[0x0].owner = msg.sender;
     }
 

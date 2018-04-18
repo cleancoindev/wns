@@ -1,6 +1,6 @@
 pragma solidity ^0.4.18;
 
-import './ENS.sol';
+import './WNS.sol';
 
 /**
  * A simple resolver anyone can use; only allows the owner of a node to set its
@@ -37,26 +37,26 @@ contract PublicResolver {
         mapping(uint256=>bytes) abis;
     }
 
-    ENS ens;
+    WNS wns;
 
     mapping (bytes32 => Record) records;
 
     modifier only_owner(bytes32 node) {
-        require(ens.owner(node) == msg.sender);
+        require(wns.owner(node) == msg.sender);
         _;
     }
 
     /**
      * Constructor.
-     * @param ensAddr The ENS registrar contract.
+     * @param wnsAddr The WNS registrar contract.
      */
-    function PublicResolver(ENS ensAddr) public {
-        ens = ensAddr;
+    function PublicResolver(WNS wnsAddr) public {
+        wns = wnsAddr;
     }
 
     /**
-     * Sets the address associated with an ENS node.
-     * May only be called by the owner of that node in the ENS registry.
+     * Sets the address associated with an WNS node.
+     * May only be called by the owner of that node in the WNS registry.
      * @param node The node to update.
      * @param addr The address to set.
      */
@@ -66,8 +66,8 @@ contract PublicResolver {
     }
 
     /**
-     * Sets the content hash associated with an ENS node.
-     * May only be called by the owner of that node in the ENS registry.
+     * Sets the content hash associated with an WNS node.
+     * May only be called by the owner of that node in the WNS registry.
      * Note that this resource type is not standardized, and will likely change
      * in future to a resource type based on multihash.
      * @param node The node to update.
@@ -79,8 +79,8 @@ contract PublicResolver {
     }
     
     /**
-     * Sets the name associated with an ENS node, for reverse records.
-     * May only be called by the owner of that node in the ENS registry.
+     * Sets the name associated with an WNS node, for reverse records.
+     * May only be called by the owner of that node in the WNS registry.
      * @param node The node to update.
      * @param name The name to set.
      */
@@ -90,7 +90,7 @@ contract PublicResolver {
     }
 
     /**
-     * Sets the ABI associated with an ENS node.
+     * Sets the ABI associated with an WNS node.
      * Nodes may have one ABI of each content type. To remove an ABI, set it to
      * the empty string.
      * @param node The node to update.
@@ -106,8 +106,8 @@ contract PublicResolver {
     }
     
     /**
-     * Sets the SECP256k1 public key associated with an ENS node.
-     * @param node The ENS node to query
+     * Sets the SECP256k1 public key associated with an WNS node.
+     * @param node The WNS node to query
      * @param x the X coordinate of the curve point for the public key.
      * @param y the Y coordinate of the curve point for the public key.
      */
@@ -117,8 +117,8 @@ contract PublicResolver {
     }
 
     /**
-     * Sets the text data associated with an ENS node and key.
-     * May only be called by the owner of that node in the ENS registry.
+     * Sets the text data associated with an WNS node and key.
+     * May only be called by the owner of that node in the WNS registry.
      * @param node The node to update.
      * @param key The key to set.
      * @param value The text data value to set.
@@ -129,8 +129,8 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the text data associated with an ENS node and key.
-     * @param node The ENS node to query.
+     * Returns the text data associated with an WNS node and key.
+     * @param node The WNS node to query.
      * @param key The text data key to query.
      * @return The associated text data.
      */
@@ -139,9 +139,9 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the SECP256k1 public key associated with an ENS node.
+     * Returns the SECP256k1 public key associated with an WNS node.
      * Defined in EIP 619.
-     * @param node The ENS node to query
+     * @param node The WNS node to query
      * @return x, y the X and Y coordinates of the curve point for the public key.
      */
     function pubkey(bytes32 node) public view returns (bytes32 x, bytes32 y) {
@@ -149,9 +149,9 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the ABI associated with an ENS node.
+     * Returns the ABI associated with an WNS node.
      * Defined in EIP205.
-     * @param node The ENS node to query
+     * @param node The WNS node to query
      * @param contentTypes A bitwise OR of the ABI formats accepted by the caller.
      * @return contentType The content type of the return value
      * @return data The ABI data
@@ -168,9 +168,9 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the name associated with an ENS node, for reverse records.
+     * Returns the name associated with an WNS node, for reverse records.
      * Defined in EIP181.
-     * @param node The ENS node to query.
+     * @param node The WNS node to query.
      * @return The associated name.
      */
     function name(bytes32 node) public view returns (string) {
@@ -178,10 +178,10 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the content hash associated with an ENS node.
+     * Returns the content hash associated with an WNS node.
      * Note that this resource type is not standardized, and will likely change
      * in future to a resource type based on multihash.
-     * @param node The ENS node to query.
+     * @param node The WNS node to query.
      * @return The associated content hash.
      */
     function content(bytes32 node) public view returns (bytes32) {
@@ -189,8 +189,8 @@ contract PublicResolver {
     }
 
     /**
-     * Returns the address associated with an ENS node.
-     * @param node The ENS node to query.
+     * Returns the address associated with an WNS node.
+     * @param node The WNS node to query.
      * @return The associated address.
      */
     function addr(bytes32 node) public view returns (address) {
