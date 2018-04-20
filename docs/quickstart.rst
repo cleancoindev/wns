@@ -4,11 +4,11 @@ Quickstart
 
 Just want to get a name and make it resolve to something? Here's how.
 
-First, download `ensutils-testnet.js`_ to your local machine, and import it into an Ethereum console on a node synced to ropsten or rinkeby:
+First, download `wnsutils-testnet.js`_ to your local machine, and import it into an Wanchain console on a node synced to testnet:
 
 ::
 
-    loadScript('/path/to/ensutils-testnet.js');
+    loadScript('/path/to/wnsutils-testnet.js');
 
 Before registering, check that nobody owns the name you want to register:
 
@@ -22,11 +22,11 @@ If this line returns a date earlier than the current date, the name is available
 
     testRegistrar.register(web3.sha3('myname'), eth.accounts[0], {from: eth.accounts[0]})
 
-Next, tell the ENS registry to use the public resolver for your name:
+Next, tell the WNS registry to use the public resolver for your name:
 
 ::
 
-    ens.setResolver(namehash('myname.test'), publicResolver.address, {from: eth.accounts[0]});
+    wns.setResolver(namehash('myname.test'), publicResolver.address, {from: eth.accounts[0]});
 
 Once that transaction is mined, tell the resolver to resolve that name to your account:
 
@@ -44,8 +44,8 @@ If you want, create a subdomain and do the whole thing all over again:
 
 ::
 
-    ens.setSubnodeOwner(namehash('myname.test'), web3.sha3('foo'), eth.accounts[1], {from: eth.accounts[0]});
-    ens.setResolver(namehash('foo.myname.test'), publicResolver.address, {from: eth.accounts[1]});
+    wns.setSubnodeOwner(namehash('myname.test'), web3.sha3('foo'), eth.accounts[1], {from: eth.accounts[0]});
+    wns.setResolver(namehash('foo.myname.test'), publicResolver.address, {from: eth.accounts[1]});
     ...
 
 Finally, you can resolve your newly created name:
@@ -60,5 +60,5 @@ which is shorthand for:
 
     resolverContract.at(ens.resolver(namehash('myname.test'))).addr(namehash('myname.test'))
 
-.. _ensutils.js: https://github.com/ethereum/ens/blob/master/ensutils.js
-.. _ensutils-testnet.js: https://github.com/ethereum/ens/blob/master/ensutils-testnet.js
+.. _wnsutils.js: https://github.com/wanchain/wns/blob/master/wnsutils.js
+.. _wnsutils-testnet.js: https://github.com/wanchain/wns/blob/master/wnsutils-testnet.js

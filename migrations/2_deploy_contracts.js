@@ -6,6 +6,7 @@ const FIFSRegistrar = artifacts.require('./FIFSRegistrar.sol');
 // not existed, it's valid to put it here.
 // TODO: align the contract name with the source code file name.
 const Registrar = artifacts.require('./Registrar.sol');
+const publicResolver = artifacts.require('./PublicResolver.sol');
 const web3 = new (require('web3'))();
 const namehash = require('eth-ens-namehash');
 
@@ -39,6 +40,7 @@ function deployFIFSRegistrar(deployer, tld) {
     .then(function() {
       // Transfer the owner of the `rootNode` to the FIFSRegistrar
       WNS.at(WNS.address).setSubnodeOwner('0x0', rootNode.sha3, FIFSRegistrar.address);
+      deployer.deploy(publicResolver,WNS.address);
     });
 }
 
@@ -61,11 +63,12 @@ function deployAuctionRegistrar(deployer, tld) {
     .then(function() {
       // Transfer the owner of the `rootNode` to the HashRegistrar
       WNS.at(WNS.address).setSubnodeOwner('0x0', rootNode.sha3, Registrar.address);
+      deployer.deploy(publicResolver,WNS.address);
     });
 }
 
 module.exports = function(deployer, network) {
-  var tld = 'eth';
+  var tld = 'wan';
 
   if (network === 'dev.fifs') {
     deployFIFSRegistrar(deployer, tld);

@@ -45,7 +45,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ENS'
+project = u'WNS'
 copyright = u'2016, Nick Johnson <nick@ethereum.org>'
 author = u'Nick Johnson <nick@ethereum.org>'
 
@@ -99,7 +99,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ENSdoc'
+htmlhelp_basename = 'WNSdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -126,7 +126,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'ENS.tex', u'ENS Documentation',
+    (master_doc, 'WNS.tex', u'WNS Documentation',
      u'Nick Johnson \\textless{}nick@ethereum.org\\textgreater{}', 'manual'),
 ]
 
@@ -136,7 +136,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'ens', u'ENS Documentation',
+    (master_doc, 'wns', u'WNS Documentation',
      [author], 1)
 ]
 
@@ -147,8 +147,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'ENS', u'ENS Documentation',
-     author, 'ENS', 'One line description of project.',
+    (master_doc, 'WNS', u'WNS Documentation',
+     author, 'WNS', 'One line description of project.',
      'Miscellaneous'),
 ]
 

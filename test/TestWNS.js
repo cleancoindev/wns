@@ -1,4 +1,9 @@
 const ENS = artifacts.require('WNSRegistry.sol');
+const AuctionRegistrar = artifacts.require('Registrar.sol');
+const Deed = artifacts.require('Deed.sol');
+const FIFS = artifacts.require('FIFSRegistrar.sol');
+const PublicResolver = artifacts.require('PublicResolver.sol');
+const ReverseResolver = artifacts.require('DefaultReverseResolver.sol');
 
 const utils = require('./helpers/Utils.js');
 const web3Utils = require('web3-utils');
@@ -12,7 +17,20 @@ contract('ENS', function (accounts) {
         ens = await ENS.new();
     });
 
-    it('should allow ownership transfers', async () => {
+    it('should allow ownership transfers', async () => {  
+        console.log("ens abi----------------\n");
+        console.log(JSON.stringify(ENS.bytecode));      
+        //console.log("\n\nAuctionRegistrar abi-----------");
+        //console.log(JSON.stringify(AuctionRegistrar.abi));
+        //console.log("\n\nDeed abi-----------");
+        //console.log(JSON.stringify(Deed.abi));
+        // console.log("\n\nFIFS abi-----------");
+        // console.log(JSON.stringify(FIFS.abi));
+        // console.log("\n\nPublicResolver abi-----------");
+        // console.log(JSON.stringify(PublicResolver.abi));
+        // console.log("\n\nReverseResolver abi-----------");
+        // console.log(JSON.stringify(ReverseResolver.abi));        
+
         let result = await ens.setOwner(0, '0x1234', {from: accounts[0]});
 
         assert.equal(await ens.owner(0), '0x0000000000000000000000000000000000001234')
