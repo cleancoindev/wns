@@ -64,11 +64,18 @@ contract('WNS', function (accounts) {
         console.log("name myname.test owner is: " + mynameTestOwner);
         await wns.setResolver(namehash('myname.test'), publicResolver.address, {from: addrTest});
 
-        //
-        var tempDestAddr = "0x1234";
-        console.log("resolver set myname.test address: " + addrTest);
-        publicResolver.setAddr(namehash('myname.test'), addrTest, {from: addrTest});
+        //        
+        console.log("resolver will setting myname.test to address: " + addrTest);
+        await publicResolver.setAddr(namehash('myname.test'), addrTest, {from: addrTest});
         console.log("get myname.test address: " + await getAddr("myname.test"));
         //assert.equal(await wns.owner(0), '0x77E00Ae5BFD8ba7Fc476Cf28448A9A521C8bf2de')
+
+        //set sub node abcde.myname.test to addr
+        console.log("setting sub node foo.myname.test to :" + addrAuction);
+        await wns.setSubnodeOwner(namehash('myname.test'), web3.sha3('foo'), addrAuction, {from: addrTest}); 
+        console.log("foo.myname.test owner is " + await wns.owner(namehash("foo.myname.test")));       
+        await wns.setResolver(namehash('foo.myname.test'), publicResolver.address, {from: addrAuction});    
+        await publicResolver.setAddr(namehash('foo.myname.test'), addrTest, {from: addrAuction});    
+        assert.equal(await wns.owner(namehash('foo.myname.test')), addrAuction);
     });
 });
