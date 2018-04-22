@@ -1,6 +1,6 @@
 const WNS = artifacts.require('WNSRegistry.sol');
 const AuctionRegistrar = artifacts.require('Registrar.sol');
-const Deed = artifacts.require('Deed.sol');
+const DeedContract = artifacts.require('Deed.sol');
 const FIFS = artifacts.require('FIFSRegistrar.sol');
 const PublicResolver = artifacts.require('PublicResolver.sol');
 const ReverseResolver = artifacts.require('DefaultReverseResolver.sol');
@@ -30,6 +30,22 @@ function advanceTime(delay, done) {
 		"method": "evm_increaseTime",
 		params: [delay]}, done)
 }
+
+function genNextBlock(){
+    return new Promise((resolve, reject) => {
+          web3.currentProvider.sendAsync({
+            jsonrpc: '2.0', 
+            method: 'evm_mine',
+            params: [],
+            id: new Date().getTime()
+          }, function(err) {
+            if (err) return reject(err);
+            resolve();
+          });
+    });                
+}
+
+
 var advanceTimeAsync = Promise.promisify(advanceTime);
 
 // days in secs
@@ -185,11 +201,10 @@ describe('SimpleHashRegistrar', function() {
 		await advanceTimeAsync(launchLength);
 
         // Save initial balances
-		async.each(bidData, async (bid) => {
+		for(var bid of bidData) {
 			balance = await web3.eth.getBalance(bid.account);
-			console.log(balance.toNumber());
 			bid.startingBalance = balance.toFixed();
-		});
+		}
 
 		// Start an auction for 'name'
 		await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
@@ -199,10 +214,10 @@ describe('SimpleHashRegistrar', function() {
 		assert.equal(result[0], 1);
 
 		// Place each of the bids
-		async.each(bidData, async (bid) => {
+		for(var bid of bidData) {
 			bid.sealedBid = await registrar.shaBid(web3.sha3('name'), bid.account, bid.value, bid.salt);
 			txid = await registrar.newBid(bid.sealedBid, {from: bid.account, value: bid.deposit});
-		});
+		}
 
 		// Try to reveal a bid early
 		await registrar.unsealBid(web3.sha3('name'), bidData[0].value, bidData[0].salt, {from: bidData[0].account}).catch((error) => { utils.ensureException(error); });
@@ -210,8 +225,8 @@ describe('SimpleHashRegistrar', function() {
 		// Advance 3 days to the reveal period
 		await advanceTimeAsync(days(3) + 60);		
 
-		// Start an auction for 'anothername' to force time update
-		await registrar.startAuction(web3.sha3('anothername'), {from: accounts[0]});
+		// force time update
+		await genNextBlock();
 
 		// checks status
 		result = await registrar.entries(web3.sha3('name'));
@@ -219,71 +234,57 @@ describe('SimpleHashRegistrar', function() {
 		assert.equal(result[0], 4);
 
 		// Reveal all the bids
-		async.each(bidData, async (bid) => {
+		for (var bid of bidData){
 			if(bid.salt !== 6){
-				console.log('bid.salt:' + bid.salt);
 				txid = await registrar.unsealBid(web3.sha3('name'), bid.value, bid.salt, {from: bid.account});
 			}
-		});
+		}
 
 		// Advance another two days to the end of the auction
-		await advanceTimeAsync(days(2));
-		// Start an auction for 'anothername' to force time update
-		await registrar.startAuction(web3.sha3('dummy'), {from: accounts[0]});
-
-		// Finalize the auction
-		console.log(accounts);
-		txid = await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[1], gas:4000000});
+		await advanceTimeAsync(days(2)+20);
+		// force time update
+		await genNextBlock();
 
 		//Reveal last bid
 		bid = bidData[5];
 		await registrar.unsealBid(web3.sha3('name'), bid.value, bid.salt, {from: bid.account}).catch((error) => { utils.ensureException(error); });
 
+		// Finalize the auction	
+		txid = await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[1], gas:500000});
 
-		// 	// Check the name has the correct owner, value, and highestBid
-		// 	function(done) {
-		// 		registrar.entries(web3.sha3('name'), function(err, result) {
-		// 			assert.equal(err, null, err);
-		// 			assert.equal(result[0], 2); // status == Owned
-		// 			assert.equal(result[3], 1.5e18); // value = 1.5 ether
-		// 			assert.equal(result[4], 2e18); // highestBid = 2 ether
-		// 			var deed = web3.eth.contract(deedABI).at(result[1]);
-		// 			async.series([
-		// 				// Check the owner is correct
-		// 				function(done) {
-		// 					deed.owner(function(err, addr) {
-		// 						assert.equal(err, null, err);
-		// 						assert.equal(addr, accounts[1]);
-		// 						done();
-		// 					});
-		// 				},
-		// 				// Check the registrar is correct
-		// 				function(done) {
-		// 					deed.registrar(function(err, addr) {
-		// 						assert.equal(err, null, err);
-		// 						assert.equal(addr, registrar.address);
-		// 						done();
-		// 					});
-		// 				},
-		// 				// Check the balance is correct
-		// 				function(done) {
-		// 					web3.eth.getBalance(result[1], function(err, balance) {
-		// 						assert.equal(err, null, err);
-		// 						assert.equal(balance.toNumber(), bidData[2].value);
-		// 						done();
-		// 					});
-		// 				},
-		// 				// Check the value is correct
-		// 				function(done) {
-		// 					deed.value(function(err, value) {
-		// 						assert.equal(err, null, err);
-		// 						assert.equal(value, bidData[2].value);
-		// 						done();
-		// 					});
-		// 				}
-		// 			], done);
-		// 		});
-		// 	},
+		// Check the name has the correct owner, value, and highestBid
+		result = await registrar.entries(web3.sha3('name'));
+		assert.equal(result[0], 2); // status == Owned
+		assert.equal(result[3], 1.5e18); // value = 1.5 ether
+		assert.equal(result[4], 2e18); // highestBid = 2 ether
+		var deed = DeedContract.at(result[1]);
+		// Check the owner is correct
+		var addr = await deed.owner();
+		assert.equal(addr, accounts[1]);
+		// Check the registrar is correct
+		addr = await deed.registrar();
+		assert.equal(addr, registrar.address);
+		// Check the balance is correct
+		balance = await web3.eth.getBalance(result[1]);
+		assert.equal(balance.toNumber(), bidData[2].value);
+		// Check the value is correct
+		value = await deed.value();
+		assert.equal(value, bidData[2].value);
+
+		// Check balances
+		for (var bid of bidData){
+			balance = await web3.eth.getBalance(bid.account);
+			var spentFee = Math.floor(10000*(bid.startingBalance - balance.toFixed()) / Math.min(bid.value, bid.deposit))/10000;
+			console.log('\t Bidder #' + bid.salt, bid.description + '. Spent:', 100*spentFee + '%; Expected:', 100*bid.expectedFee + '%;');
+			// TODO
+			//assert.equal(spentFee, bid.expectedFee);
+		}
+
+		// Check the owner is set in ENS
+		let owner = await ens.owner(nameDotEth);
+		assert.equal(owner, accounts[1]);
+
+
 		// 	// Check balances
 		// 	function(done) {
 		// 		async.each(bidData, function(bid, done) {
@@ -295,14 +296,5 @@ describe('SimpleHashRegistrar', function() {
 		// 			});
 		// 		}, done);
 		// 	},
-		// 	// Check the owner is set in ENS
-		// 	function(done) {
-		// 		ens.owner(nameDotEth, function(err, owner) {
-		// 			assert.equal(err, null, err);
-		// 			assert.equal(owner, accounts[1]);
-		// 			done();
-		// 		});
-		// 	}
-		// ], done);	
     });
 });
