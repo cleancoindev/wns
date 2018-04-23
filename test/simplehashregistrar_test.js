@@ -297,4 +297,98 @@ describe('SimpleHashRegistrar', function() {
 		// 		}, done);
 		// 	},
     });
+
+	it('cancels bids', async () => {
+		this.timeout(5000);
+		var bidData = [
+			// A regular bid
+			{description: 'A regular bid 1', account: accounts[0], value: 1.5e18, deposit: 2.0e18, salt: 1, expectedFee: 0.005 },
+			{description: 'A regular bid 2', account: accounts[1], value: 1.1e18, deposit: 2.0e18, salt: 1, expectedFee: 0.005 },
+			{description: 'A regular bid 3', account: accounts[2], value: 1.1e18, deposit: 2.0e18, salt: 1, expectedFee: 0.005 },
+		];
+
+		// moves past the soft launch dates
+		await advanceTimeAsync(launchLength);
+		// Start an auction for 'cancelname'
+		await registrar.startAuction(web3.sha3('cancelname'), {from: accounts[0]});
+		// Place each of the bids
+		for (var bid of bidData){
+			result = await registrar.shaBid(web3.sha3('cancelname'), bid.account, bid.value, bid.salt);
+			bid.sealedBid = result;
+			txid = await registrar.newBid(bid.sealedBid, {from: bid.account, value: bid.deposit});
+		}
+		// Attempt to cancel the first bid and fail
+		bid = bidData[0];
+		result = await registrar.shaBid(web3.sha3('cancelname'), bid.account, bid.value, bid.salt);
+		bid.sealedBid = result;
+		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account}).catch((error) => { utils.ensureException(error); });
+		result = await registrar.sealedBids(bid.account, bid.sealedBid)
+		assert.notEqual(result, 0);
+
+		// Advance 3 days to the reveal period
+		await advanceTimeAsync(days(3) + 60);
+		// Get the bid
+		bid = bidData[1];
+		result = await registrar.shaBid(web3.sha3('cancelname'), bid.account, bid.value, bid.salt);
+		bid.sealedBid = result;
+		// Attempt to cancel the second bid and fail
+		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account}).catch((error) => { utils.ensureException(error); });
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.notEqual(result, 0);
+		// Checks the bid exists
+		bid = bidData[1];
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.notEqual(result, '0x0000000000000000000000000000000000000000');
+		// Reveal the second bid
+		bid = bidData[1];
+		await registrar.unsealBid(web3.sha3('cancelname'), bid.value, bid.salt, {from: bid.account});
+		// Checks the bid doesn't exist anymore
+		bid = bidData[1];
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.equal(result, '0x0000000000000000000000000000000000000000');
+
+		// Attempt to cancel the second bid and fail
+		bid = bidData[1];
+		bid.sealedBid = await registrar.shaBid(web3.sha3('cancelname'), bid.account, bid.value, bid.salt);
+		// Checks the bid exists
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.equal(result, '0x0000000000000000000000000000000000000000');
+		// Cancels the bid
+		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account}).catch((error) => { utils.ensureException(error); });
+		// Checks that it does not exist now
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.equal(result, '0x0000000000000000000000000000000000000000');
+		// Advance another two days to the end of the auction
+		await advanceTimeAsync(days(2));
+		// Finalize the auction and get the deed address
+		result = await registrar.finalizeAuction(web3.sha3('cancelname'), {from: accounts[1]});
+		await registrar.entries(web3.sha3('cancelname'));
+		// Attempt to cancel the third bid and fail
+		bid = bidData[2];
+		bid.sealedBid = await registrar.shaBid(web3.sha3('cancelname'), bid.account, bid.value, bid.salt);
+		// Bid should exist
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.notEqual(result, '0x0000000000000000000000000000000000000000');
+		// should give an error
+		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account}).catch((error) => { utils.ensureException(error); });
+		// Bid should still exist
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.notEqual(result, '0x0000000000000000000000000000000000000000');
+		// Advance 8 weeks
+		await advanceTimeAsync(8 * days(7));
+		// Bid should exist
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.notEqual(result, 0);
+		// should NOT give an error
+		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account});
+		// Bid should not exist anymore
+		result = await registrar.sealedBids(bid.account, bid.sealedBid);
+		assert.equal(result, 0);
+		// Attempt to cancel again and fail
+		bid = bidData[2];
+		bid.sealedBid = await registrar.shaBid(web3.sha3('cancelname'), bid.account, bid.value, bid.salt);
+		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account}).catch((error) => { utils.ensureException(error); });
+	});
+
+
 });
