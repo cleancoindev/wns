@@ -390,5 +390,48 @@ describe('SimpleHashRegistrar', function() {
 		await registrar.cancelBid(bid.account, bid.sealedBid, {from: bid.account}).catch((error) => { utils.ensureException(error); });
 	});
 
+    it('releases deed after one year', async () => {
+		let sealedBid = null;
+		let winnerBalance = 0;
+		let owner = accounts[1];
+		let notOwner = accounts[0];
 
+		await advanceTimeAsync(launchLength);
+		await registrar.startAuction(web3.sha3('name'), {from: owner});
+		result = await registrar.shaBid(web3.sha3('name'), notOwner, 1e18, 1);
+		sealedBid = result;
+		await registrar.newBid(result, {from: notOwner, value: 1e18});
+		result = await registrar.shaBid(web3.sha3('name'), owner, 2e18, 2);
+		sealedBid = result;
+		await registrar.newBid(result, {from: owner, value: 2e18});
+		await advanceTimeAsync(days(3) + 60);
+		await genNextBlock();
+		await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: notOwner});
+		await registrar.unsealBid(web3.sha3('name'), 2e18, 2, {from: owner});
+		await advanceTimeAsync(days(2) + 60);
+		await registrar.finalizeAuction(web3.sha3('name'), {from: owner}).catch((error) => { utils.ensureException(error); });
+		// Cannot release early
+		await registrar.releaseDeed(web3.sha3('name'), {from: owner}).catch((error) => { utils.ensureException(error); });
+		await advanceTimeAsync(days(366) + 60);
+		// Other user cannot release it
+		await registrar.releaseDeed(web3.sha3('name'), {from: notOwner}).catch((error) => { utils.ensureException(error); });
+
+		winnerBalance = (await web3.eth.getBalance(owner)).toFixed();
+		await registrar.releaseDeed(web3.sha3('name'), {from: owner});
+		// Name should be available
+		result = await registrar.entries(web3.sha3('name'));
+		assert.equal(result[0], 0);
+
+		balance = await web3.eth.getBalance(owner);
+		let returnedEther = web3.fromWei(Number(balance.toFixed() - winnerBalance), 'ether');
+		assert.equal(1 - returnedEther < 0.01, true);
+
+		await registrar.releaseDeed(web3.sha3('name'), {from: owner}).catch((error) => { utils.ensureException(error); });
+		// force time update 
+		await genNextBlock();
+		// Check we can start an auction on the newly released name	
+		await registrar.startAuction(web3.sha3('name'), {from: owner});
+		result = await registrar.entries(web3.sha3('name'));
+		assert.equal(result[0], 1);
+    });
 });
