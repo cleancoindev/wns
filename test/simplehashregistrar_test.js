@@ -568,4 +568,26 @@ describe('SimpleHashRegistrar', function() {
         console.log("result " + result);
         console.log("auction Status:" + auctionStatus);
     });
+
+    it('takes the max of declared and provided value', async () => {
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	result = await registrar.shaBid(web3.sha3('name'), accounts[0], 2e18, 1);
+    	await registrar.newBid(result, {from: accounts[0], value: 1e18});
+    	result = await registrar.shaBid(web3.sha3('name'), accounts[0], 4e18, 1);
+    	await registrar.newBid(result, {from: accounts[1], value: 3e18});
+
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	// Reveal the bids and check they're processed correctly.
+    	await registrar.unsealBid(web3.sha3('name'), 2e18, 1, {from: accounts[0]});
+    	result = await registrar.entries(web3.sha3('name'));
+		assert.equal(result[3], 0);
+		assert.equal(result[4], 1e18);
+
+		//await registrar.unsealBid(web3.sha3('name'), 4e18, 1, {from: accounts[1]});
+		// result = await registrar.entries(web3.sha3('name'));
+		// assert.equal(result[3], 1e18);
+		// assert.equal(result[4], 3e18);
+    });
 });
