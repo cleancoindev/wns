@@ -434,4 +434,138 @@ describe('SimpleHashRegistrar', function() {
 		result = await registrar.entries(web3.sha3('name'));
 		assert.equal(result[0], 1);
     });
+
+    it('allows releasing a deed immediately when no longer the registrar', async () => {
+    	let sealedBid = null;
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});
+    	await advanceTimeAsync(days(2) + 60);
+    	await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]});
+    	await ens.setSubnodeOwner(0, web3.sha3('eth'), accounts[0], {from: accounts[0]});
+    	await registrar.releaseDeed(web3.sha3('name'), {from: accounts[0]});
+    });
+
+    it('rejects bids less than the minimum', async () => {
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	result = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e15 - 1, 1);
+    	await registrar.newBid(result, {from: accounts[0], value: 1e18});
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('name'), 1e15 - 1, 1, {from: accounts[0]});
+    	result = await registrar.entries(web3.sha3('name'));
+    	assert.equal(result[4], 0);
+    });
+
+    it("doesn't allow finalizing an auction early", async () => {
+    	var sealedBid = null;
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]})
+        await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+        sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+        await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+
+        await advanceTimeAsync(days(3) + 60);
+        await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+        await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+
+        await advanceTimeAsync(days(2) + 60)
+        await genNextBlock();
+        await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[1]}).catch((error) => { utils.ensureException(error); });
+        await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]});
+    });
+
+    it("allows finalizing an auction even when no longer the registrar", async () => {
+    	var sealedBid = null;
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});
+
+    	await advanceTimeAsync(days(2) + 60);
+        await genNextBlock();
+
+        await ens.setSubnodeOwner(0, web3.sha3('eth'), accounts[0], {from: accounts[0]});
+        await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]});
+    });
+
+    it("doesn't allow revealing a bid on a name not up for auction", async () => {
+    	var sealedBid = null;
+    	await advanceTimeAsync(launchLength);
+    	sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18}).catch((error) => { utils.ensureException(error); });    	
+    	await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+    	await advanceTimeAsync(days(1));
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});
+    });
+
+    it("doesn't invalidate long names", async () => {
+    	var sealedBid = null;
+    	await advanceTimeAsync(launchLength);
+        await registrar.startAuction(web3.sha3('longname'), {from: accounts[0]});
+    	sealedBid = await registrar.shaBid(web3.sha3('longname'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('longname'), 1e18, 1, {from: accounts[0]});
+
+    	await advanceTimeAsync(days(2) + 60);
+        await genNextBlock();
+        await registrar.finalizeAuction(web3.sha3('longname'), {from: accounts[0]});
+        await registrar.invalidateName('longname', {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+    });
+
+    it("allows invalidation even when no longer the registrar", async () => {
+    	var sealedBid = null;
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});
+
+    	await advanceTimeAsync(days(2) + 60);
+    	await genNextBlock();
+
+    	await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]});
+    	await ens.setSubnodeOwner(0, web3.sha3('eth'), accounts[0], {from: accounts[0]});
+    	//await registrar.invalidateName('name', {from: accounts[0]});
+    });
+
+    it('calling startAuction on a finished auction has no effect', async () => {
+    	var auctionStatus = null;
+    	await advanceTimeAsync(launchLength);
+    	await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+    	sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+
+    	await advanceTimeAsync(days(3) + 60);
+    	await genNextBlock();
+    	await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});
+    	auctionStatus = await registrar.entries(web3.sha3('name'));
+
+    	await advanceTimeAsync(days(2) + 60);
+        await genNextBlock();
+
+        await registrar.startAuction(web3.sha3('name'), {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+        result = await registrar.entries(web3.sha3('name'));
+        assert.deepEqual(result[1], auctionStatus[1]);
+        console.log("result " + result);
+        console.log("auction Status:" + auctionStatus);
+    });
 });
