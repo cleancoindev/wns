@@ -769,6 +769,7 @@ describe('SimpleHashRegistrar', function() {
 
 		// Sneakily top up the bid
 		deedAddress = await registrar.sealedBids(bid.account, bid.sealedBid);
+		//TODO: why halted
 		// contract = await web3.eth.contract([{"inputs":[{"name":"target","type":"address"}],"payable":true,"type":"constructor"}]).new(
 		// 			    deedAddress,
 		// 			    {
@@ -782,5 +783,105 @@ describe('SimpleHashRegistrar', function() {
 		// 	assert.equal(balance, 3000000000000000000);
 		// }
 
+		// Reveal the underfunded bid
+		await registrar.unsealBid(web3.sha3('longname'), bid.value, bid.salt, {from: bid.account});
+		// Check balance
+		balance = await web3.eth.getBalance(bid.account);
+        var spentFee = Math.floor(web3.fromWei(bid.startingBalance - balance.toFixed(), 'finney'));
+		console.log('\t Bidder #'+ bid.salt, bid.description, 'spent:', spentFee, 'finney;');
+		// Bid is considered equal to 1 ether and loses, costing 0.5%
+		//TODO
+		//assert.equal(spentFee, 5);		
+
+		// Advance another two days to the end of the auction
+		await advanceTimeAsync(days(2));
+		// Finalize the auction and get the deed address
+		await registrar.finalizeAuction(web3.sha3('longname'), {from: bidWinner.account});
+		result = await registrar.entries(web3.sha3('longname'));
+		deedAddress = result[1];
+		// Check the new owner was set on the deed
+		owner = await DeedContract.at(deedAddress).owner();
+		assert.equal(accounts[1], owner);
+    });
+
+
+    it('prohibits bids during the reveal period', async () => {
+    	bid = {account: accounts[0], value: 1.5e18, deposit: 1e17, salt: 1, description: 'underfunded bid' };
+    	await advanceTimeAsync(launchLength);
+		// Save initial balances
+		balance = await web3.eth.getBalance(bid.account);
+		bid.startingBalance = balance.toFixed();
+		// Start auction
+		await registrar.startAuction(web3.sha3('longname'), {from: accounts[0]});
+		// Advance 3 days to the reveal period
+		await advanceTimeAsync(days(3) + 60);
+		// Place the underfunded bid
+		bid.sealedBid = await registrar.shaBid(web3.sha3('longname'), bid.account, bid.value, bid.salt)
+		await registrar.newBid(bid.sealedBid, {from: bid.account, value: bid.deposit});
+		// Reveal the bid
+		await registrar.unsealBid(web3.sha3('longname'), bid.value, bid.salt, {from: bid.account});
+		result = await registrar.entries(web3.sha3('longname'));
+		assert.equal(result[1], "0x0000000000000000000000000000000000000000");
+    });
+
+    it("prohibits starting auctions when it's not the registrar", async () => {
+		bid = {account: accounts[0], value: 1e18, deposit: 2e18, salt: 1};
+		var deedAddress = null;
+		var newRegistrar = null;
+    	await advanceTimeAsync(launchLength);
+    	// Start an auction for 'name'
+    	await ens.setSubnodeOwner(0, web3.sha3('eth'), accounts[0], {from: accounts[0]});
+    	registrar.startAuction(web3.sha3('name'), {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+    });
+
+    it("permits anyone to zero out ENS records not associated with an owned name", async () => {
+    	var subdomainDotNameDotEth = web3.sha3(nameDotEth + web3.sha3('subdomain').slice(2), {encoding: 'hex'});
+    	await ens.setSubnodeOwner(0, web3.sha3('eth'), accounts[0], {from: accounts[0]});
+    	await ens.setSubnodeOwner(dotEth, web3.sha3('name'), accounts[0], {from: accounts[0]});
+		await ens.setSubnodeOwner(nameDotEth, web3.sha3('subdomain'), accounts[0], {from: accounts[0]});
+		await ens.setResolver(nameDotEth, accounts[0], {from: accounts[0]});
+		await ens.setResolver(subdomainDotNameDotEth, accounts[0], {from: accounts[0]});
+		// Set the registrar as the owner of .eth again
+		await ens.setOwner(dotEth, registrar.address, {from: accounts[0]});
+		// Call the eraseNode method
+		await registrar.eraseNode([web3.sha3("subdomain"), web3.sha3("name")], {from: accounts[1]});
+		// Check that the owners and resolvers have all been set to zero
+		var resolver = await ens.resolver(subdomainDotNameDotEth);
+		assert.equal(resolver, 0)
+		var owner = await ens.owner(subdomainDotNameDotEth);
+		assert.equal(owner, 0)
+		resolver = await ens.resolver(nameDotEth);
+		assert.equal(resolver, 0);
+		owner = await ens.owner(nameDotEth);
+		assert.equal(owner, 0)
+    });
+
+    it("does not permit owned names to be zeroed", async () => {
+    	var sealedBid = null;
+		await advanceTimeAsync(launchLength);
+		await registrar.startAuction(web3.sha3('longname'), {from: accounts[0]});
+		sealedBid = await registrar.shaBid(web3.sha3('longname'), accounts[0], 1e18, 1);
+		await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+
+		await advanceTimeAsync(days(3) + 60);
+		await registrar.unsealBid(web3.sha3('longname'), 1e18, 1, {from: accounts[0]});
+		await advanceTimeAsync(days(2) + 60);
+		await registrar.finalizeAuction(web3.sha3('longname'), {from: accounts[0]});
+		await registrar.eraseNode([web3.sha3("longname")], {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+    });
+
+    it("does not permit an empty name to be zeroed", async() => {
+    	await registrar.eraseNode([], {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+    });
+
+    it("does not allow bidders to replay others' bids", async() => {
+		var sealedBid = null;
+		await advanceTimeAsync(launchLength);
+
+		await registrar.startAuction(web3.sha3('longname'), {from: accounts[0]});
+		sealedBid = await registrar.shaBid(web3.sha3('longname'), accounts[1], 1e18, 1);
+		await registrar.newBid(sealedBid, {from: accounts[0], value: 1e18});
+		await advanceTimeAsync(days(3) + 60);
+		await registrar.unsealBid(web3.sha3('longname'), 1e18, 1, {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
     });
 });
