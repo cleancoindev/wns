@@ -42,7 +42,7 @@ contract Registrar {
     event BidRevealed(bytes32 indexed hash, address indexed owner, uint value, uint8 status);
     event HashRegistered(bytes32 indexed hash, address indexed owner, uint value, uint registrationDate);
     event HashReleased(bytes32 indexed hash, uint value);
-    event HashInvalidated(bytes32 indexed hash, string indexed name, uint value, uint registrationDate);
+    event HashInvalidated(bytes32 indexed hash, string name, uint value, uint registrationDate);
 
     struct Entry {
         Deed deed;
