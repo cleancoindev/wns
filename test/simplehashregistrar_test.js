@@ -668,5 +668,119 @@ describe('SimpleHashRegistrar', function() {
 		];
 		var deedAddress = null;
 		var newRegistrar = null;
+
+		// Advance past soft launch
+		await advanceTimeAsync(launchLength + 60);
+		// Start an auction for 'name'
+		await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+
+		// Place each of the bids
+    	result = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(result, {from: accounts[0], value: 2e18});
+    	// Advance time and reveal the bid
+		await advanceTimeAsync(days(3) + 60);
+		await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});
+		// Advance another two days to the end of the auction
+		await advanceTimeAsync(days(2));
+		// Finalize the auction and get the deed address
+		await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]});
+		result = await registrar.entries(web3.sha3('name'));
+		deedAddress = result[1];
+
+		// Transferring the deed should fail
+		registrar.transferRegistrars(web3.sha3('name'), {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+		// Deploy a new registrar
+		newRegistrar = await AuctionRegistrar.new(ens.address, dotEth, 0, {from: accounts[0], gas: 4700000});
+		// Update ENS with a new registrar
+		await ens.setSubnodeOwner(0, web3.sha3('eth'), newRegistrar.address, {from: accounts[0]});
+		// Transfer the deed
+		await registrar.transferRegistrars(web3.sha3('name'), {from: accounts[0]});
+		// Check the deed was transferred as expected
+		owner = await DeedContract.at(deedAddress).registrar();
+		assert.equal(newRegistrar.address, owner);
+
+		// Check the record is unset on the old registrar
+		entry = await registrar.entries(web3.sha3('name'));
+		assert.equal(entry[0], 0);
+		assert.equal(entry[1], 0);
+		assert.equal(entry[2], 0);
+		assert.equal(entry[3], 0);
+		assert.equal(entry[4], 0);
+    });
+
+    it('supports transferring domains to another account', async () =>{
+		var bidData = [
+			{account: accounts[0], value: 1e18, deposit: 2e18, salt: 1},
+		];
+		var deedAddress = null;
+    	await advanceTimeAsync(launchLength);
+    	// Start an auction for 'name'
+		await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
+		// Place each of the bids
+    	sealedBid = await registrar.shaBid(web3.sha3('name'), accounts[0], 1e18, 1);
+    	await registrar.newBid(sealedBid, {from: accounts[0], value: 2e18});
+
+        await advanceTimeAsync(days(3) + 60);
+        // Reveal the bid
+		await registrar.unsealBid(web3.sha3('name'), 1e18, 1, {from: accounts[0]});    	
+
+		// Make sure we can't transfer it yet
+		await registrar.transfer(web3.sha3('name'), accounts[1], {from: accounts[0]}).catch((error) => { utils.ensureException(error); });
+
+		// Advance another two days to the end of the auction
+		await advanceTimeAsync(days(2));
+		// Finalize the auction and get the deed address
+		await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[0]});
+		result = await registrar.entries(web3.sha3('name'));
+		deedAddress = result[1];
+		// Try and transfer it when we don't own it
+		await registrar.transfer(web3.sha3('name'), accounts[1], {from: accounts[1]}).catch((error) => { utils.ensureException(error); });
+		// Transfer ownership to another account
+		await registrar.transfer(web3.sha3('name'), accounts[1], {from: accounts[0]});
+		// Check the new owner was set on the deed
+		owner = await DeedContract.at(deedAddress).owner();
+		assert.equal(accounts[1], owner);
+		// Check the new owner was set in ENS
+		owner = await ens.owner(nameDotEth);
+		assert.equal(accounts[1], owner);
+    });
+
+    it('prohibits late funding of bids', async () => {
+		bid = {account: accounts[0], value: 1.3e18, deposit: 1.0e18, salt: 1, description: 'underfunded bid' };
+		let bidWinner = {account: accounts[1], value: 1.2e18, deposit: 1.6e18, salt: 1, description: 'normally funded bid' };
+		let deedAddress = null;
+
+		await advanceTimeAsync(launchLength);
+		// Save initial balances
+		balance = await web3.eth.getBalance(bid.account);
+		bid.startingBalance = balance.toFixed();
+		// Start auction
+		await registrar.startAuction(web3.sha3('longname'), {from: accounts[0]});
+		// Place the underfunded bid
+		bid.sealedBid = await registrar.shaBid(web3.sha3('longname'), bid.account, bid.value, bid.salt)
+		await registrar.newBid(bid.sealedBid, {from: bid.account, value: bid.deposit});
+		// Place the normal bid
+		bidWinner.sealedBid = await registrar.shaBid(web3.sha3('longname'), bidWinner.account, bidWinner.value, bidWinner.salt);
+		await registrar.newBid(bidWinner.sealedBid, {from: bidWinner.account, value: bidWinner.deposit});
+		// Advance 3 days to the reveal period
+		await advanceTimeAsync(days(3) + 60);
+		// Reveal the normal bid
+		await registrar.unsealBid(web3.sha3('longname'), bidWinner.value, bidWinner.salt, {from: bidWinner.account});
+
+		// Sneakily top up the bid
+		deedAddress = await registrar.sealedBids(bid.account, bid.sealedBid);
+		// contract = await web3.eth.contract([{"inputs":[{"name":"target","type":"address"}],"payable":true,"type":"constructor"}]).new(
+		// 			    deedAddress,
+		// 			    {
+		// 			    	from: accounts[0],
+		// 			     	data: "0x6060604052604051602080607b833981016040528080519060200190919050505b8073ffffffffffffffffffffffffffffffffffffffff16ff5b505b60338060486000396000f30060606040525bfe00a165627a7a72305820d4d9412759c88c41f1dd38f8ae34c9c2fa9d5c9fa90eadb1b343a98155e74bb50029",
+		// 			     	gas: 4700000,
+		// 			     	value: 2e18,
+		// 			   	});
+		// if(contract.address != undefined) {
+		// 	balance = await web3.eth.getBalance(deedAddress);
+		// 	assert.equal(balance, 3000000000000000000);
+		// }
+
     });
 });
