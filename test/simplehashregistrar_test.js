@@ -6,6 +6,7 @@ const PublicResolver = artifacts.require('PublicResolver.sol');
 const ReverseResolver = artifacts.require('DefaultReverseResolver.sol');
 const TestRegistrar = artifacts.require('TestRegistrar.sol');
 const utils = require('./helpers/Utils.js');
+const SneakTopUp = artifacts.require('./helpers/SneakTopUp.sol');
 
 
 var assert = require('assert');
@@ -769,19 +770,17 @@ describe('SimpleHashRegistrar', function() {
 
 		// Sneakily top up the bid
 		deedAddress = await registrar.sealedBids(bid.account, bid.sealedBid);
-		//TODO: why halted
-		// contract = await web3.eth.contract([{"inputs":[{"name":"target","type":"address"}],"payable":true,"type":"constructor"}]).new(
-		// 			    deedAddress,
-		// 			    {
-		// 			    	from: accounts[0],
-		// 			     	data: "0x6060604052604051602080607b833981016040528080519060200190919050505b8073ffffffffffffffffffffffffffffffffffffffff16ff5b505b60338060486000396000f30060606040525bfe00a165627a7a72305820d4d9412759c88c41f1dd38f8ae34c9c2fa9d5c9fa90eadb1b343a98155e74bb50029",
-		// 			     	gas: 4700000,
-		// 			     	value: 2e18,
-		// 			   	});
-		// if(contract.address != undefined) {
-		// 	balance = await web3.eth.getBalance(deedAddress);
-		// 	assert.equal(balance, 3000000000000000000);
-		// }
+		contract = await  SneakTopUp.new(deedAddress,
+					    {
+					    	from: accounts[0],
+					     	gas: 4700000,
+					     	value: 2e18,
+					   	});
+		if(contract.address != undefined) {
+			await contract.killContract();
+			balance = await web3.eth.getBalance(deedAddress).toNumber();
+			assert.equal(balance, 3000000000000000000);
+		}
 
 		// Reveal the underfunded bid
 		await registrar.unsealBid(web3.sha3('longname'), bid.value, bid.salt, {from: bid.account});
