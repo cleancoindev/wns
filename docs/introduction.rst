@@ -2,13 +2,6 @@
 Introduction
 *******************
 
-..  image:: img/ens-logo.jpg
-   :height: 351px
-   :width: 300px
-   :scale: 50%
-   :alt: WNS logo
-   :align: right
-
 WNS is the Wanchain Name Service, a distributed, open, and extensible naming system based on the Wanchain blockchain.
 
 WNS can be used to resolve a wide variety of resources. The initial standard for WNS defines resolution for Wanchain addresses, but the system is extensible by design, allowing more resource types to be resolved in future without the core components of WNS requiring upgrades.

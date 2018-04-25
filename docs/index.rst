@@ -15,8 +15,6 @@ Welcome to WNS's documentation!
    userguide
    implementers
    deploying
-   dns
-   faq
 
 
 This document is licensed under the @emph{Creative Commons Attribution License}. To
