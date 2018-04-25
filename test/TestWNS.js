@@ -18,8 +18,8 @@ contract('ENS', function (accounts) {
     });
 
     it('should allow ownership transfers', async () => {  
-        console.log("ens abi----------------\n");
-        console.log(JSON.stringify(ENS.bytecode));      
+        //console.log("ens abi----------------\n");
+        //console.log(JSON.stringify(ENS.bytecode));      
         //console.log("\n\nAuctionRegistrar abi-----------");
         //console.log(JSON.stringify(AuctionRegistrar.abi));
         //console.log("\n\nDeed abi-----------");
