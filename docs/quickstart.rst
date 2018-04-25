@@ -20,19 +20,19 @@ If this line returns a date earlier than the current date, the name is available
 
 ::
 
-    testRegistrar.register(web3.sha3('myname'), eth.accounts[0], {from: eth.accounts[0]})
+    testRegistrar.register(web3.sha3('myname'), eth.accounts[0], {from: eth.accounts[0], gasPrice:200000000000})
 
 Next, tell the WNS registry to use the public resolver for your name:
 
 ::
 
-    wns.setResolver(namehash('myname.test'), publicResolver.address, {from: eth.accounts[0]});
+    wns.setResolver(namehash('myname.test'), publicResolver.address, {from: eth.accounts[0], gasPrice:200000000000});
 
 Once that transaction is mined, tell the resolver to resolve that name to your account:
 
 ::
 
-    publicResolver.setAddr(namehash('myname.test'), eth.accounts[0], {from: eth.accounts[0]});
+    publicResolver.setAddr(namehash('myname.test'), eth.accounts[0], {from: eth.accounts[0], gasPrice:200000000000});
 
 ...or any other address:
 
@@ -44,8 +44,8 @@ If you want, create a subdomain and do the whole thing all over again:
 
 ::
 
-    wns.setSubnodeOwner(namehash('myname.test'), web3.sha3('foo'), eth.accounts[1], {from: eth.accounts[0]});
-    wns.setResolver(namehash('foo.myname.test'), publicResolver.address, {from: eth.accounts[1]});
+    wns.setSubnodeOwner(namehash('myname.test'), web3.sha3('foo'), eth.accounts[1], {from: eth.accounts[0], gasPrice:200000000000});
+    wns.setResolver(namehash('foo.myname.test'), publicResolver.address, {from: eth.accounts[1], gasPrice:200000000000});
     ...
 
 Finally, you can resolve your newly created name:
