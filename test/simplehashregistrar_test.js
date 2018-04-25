@@ -251,7 +251,7 @@ describe('SimpleHashRegistrar', function() {
 		await registrar.unsealBid(web3.sha3('name'), bid.value, bid.salt, {from: bid.account}).catch((error) => { utils.ensureException(error); });
 
 		// Finalize the auction	
-		txid = await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[1], gas:500000});
+		txid = await registrar.finalizeAuction(web3.sha3('name'), {from: accounts[1]});
 
 		// Check the name has the correct owner, value, and highestBid
 		result = await registrar.entries(web3.sha3('name'));
@@ -277,8 +277,7 @@ describe('SimpleHashRegistrar', function() {
 			balance = await web3.eth.getBalance(bid.account);
 			var spentFee = Math.floor(10000*(bid.startingBalance - balance.toFixed()) / Math.min(bid.value, bid.deposit))/10000;
 			console.log('\t Bidder #' + bid.salt, bid.description + '. Spent:', 100*spentFee + '%; Expected:', 100*bid.expectedFee + '%;');
-			// TODO
-			//assert.equal(spentFee, bid.expectedFee);
+			assert.equal(spentFee, bid.expectedFee);
 		}
 
 		// Check the owner is set in ENS
