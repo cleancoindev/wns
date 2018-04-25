@@ -38,7 +38,7 @@ Once that transaction is mined, tell the resolver to resolve that name to your a
 
 ::
 
-    publicResolver.setAddr(namehash('myname.test'), '0x1234...', {from: eth.accounts[0]});
+    publicResolver.setAddr(namehash('myname.test'), '0x1234', {from: eth.accounts[0], gasPrice:200000000000});
 
 If you want, create a subdomain and do the whole thing all over again:
 
