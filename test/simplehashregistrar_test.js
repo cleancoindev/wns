@@ -276,7 +276,7 @@ describe('SimpleHashRegistrar', function() {
 		for (var bid of bidData){
 			balance = await web3.eth.getBalance(bid.account);
 			var spentFee = Math.floor(10000*(bid.startingBalance - balance.toFixed()) / Math.min(bid.value, bid.deposit))/10000;
-			console.log('\t Bidder #' + bid.salt, bid.description + '. Spent:', 100*spentFee + '%; Expected:', 100*bid.expectedFee + '%;');
+			//console.log('\t Bidder #' + bid.salt, bid.description + '. Spent:', 100*spentFee + '%; Expected:', 100*bid.expectedFee + '%;');
 			assert.equal(spentFee, bid.expectedFee);
 		}
 
@@ -621,15 +621,13 @@ describe('SimpleHashRegistrar', function() {
     	// Check account balances
     	balance = await web3.eth.getBalance(bid.account);
     	var spentFee = Math.floor(web3.fromWei(bid.startingBalance - balance.toFixed(), 'finney'));
-    	// TODO:
-    	// console.log('\t Bidder #'+ bid.salt, bid.description, 'spent:', spentFee, 'finney;');
-    	// assert.equal(spentFee, 5);
+    	console.log('\t Bidder #'+ bid.salt, bid.description, 'spent:', spentFee, 'finney;');
+    	assert.equal(spentFee, 5);
 
     	balance = await web3.eth.getBalance(invalidator.account);
 		let fee = Math.floor(web3.fromWei(balance.toFixed() - invalidator.startingBalance, 'finney'));
-		// TODO:
 		// console.log('\t Invalidator got: ', fee, 'finney');
-		// assert.equal(fee, 4);
+		assert.equal(fee, 4);
 		owner = await ens.owner(nameDotEth);
 		assert.equal(owner, 0);
 		await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
@@ -788,8 +786,7 @@ describe('SimpleHashRegistrar', function() {
         var spentFee = Math.floor(web3.fromWei(bid.startingBalance - balance.toFixed(), 'finney'));
 		console.log('\t Bidder #'+ bid.salt, bid.description, 'spent:', spentFee, 'finney;');
 		// Bid is considered equal to 1 ether and loses, costing 0.5%
-		//TODO
-		//assert.equal(spentFee, 5);		
+		assert.equal(spentFee, 5);		
 
 		// Advance another two days to the end of the auction
 		await advanceTimeAsync(days(2));
