@@ -87,7 +87,6 @@ describe('SimpleHashRegistrar', function() {
 	});
 
 	it('starts auctions', async () => {
-		//advanceTime(launchLength, done);
 		await advanceTimeAsync(launchLength);
 		await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
 		await advanceTimeAsync(days(2));
