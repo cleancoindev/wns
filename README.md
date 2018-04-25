@@ -70,11 +70,11 @@ Implements the addr resource type. Returns the Ethereum address associated with 
 # Getting started
 Install Truffle
 
-	$ npm install -g truffle
+	$ npm install -g ganache-cli
 
 Launch the RPC client, for example TestRPC:
 
-	$ testrpc
+	$ ganache-cli
 
 Deploy `ENS` and `FIFSRegistrar` to the private network, the deployment process is defined at [here](migrations/2_deploy_contracts.js):
 
