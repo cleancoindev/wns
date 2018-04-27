@@ -2,7 +2,7 @@
 Implementer's Guide
 *******************
 
-This section is intended to provide guidance for anyone wanting to implement tools and applications that use ENS, or custom resolvers within ENS.
+This section is intended to provide guidance for anyone wanting to implement tools and applications that use WNS, or custom resolvers within WNS.
 
 Writing a resolver
 ==================
@@ -18,9 +18,9 @@ Resolvers are specified in EIP137_. A resolver must implement the following meth
 +------------------+-------------+--------------+------------+
 | Record type      | Function(s) | Interface ID | Defined in |
 +==================+=============+==============+============+
-| Ethereum address | `addr`      | 0x3b3b57de   | EIP137_    |
+| Wanchain address | `addr`      | 0x3b3b57de   | EIP137_    |
 +------------------+-------------+--------------+------------+
-| ENS Name         | `name`      | 0x691f3431   | EIP181_    |
+| WNS Name         | `name`      | 0x691f3431   | EIP181_    |
 +------------------+-------------+--------------+------------+
 | ABI specification| `ABI`       | 0x2203ab56   | EIP205_    |
 +------------------+-------------+--------------+------------+
@@ -47,16 +47,16 @@ For example, a simple resolver that supports only the `addr` type might look som
 
 This trivial resolver always returns its own address as answer to all queries. Practical resolvers may use any mechanism they wish to determine what results to return, though they should be `constant`, and should minimise gas usage wherever possible.
 
-NOTE: If you are resolving `addr()` records, you MUST treat a return value from the resolver of `0x00...00` as that record being unset. Failing to do so could result in users accidentally sending funds to the null address if they have configured a resolver in ENS, but not set the resolver record!
+NOTE: If you are resolving `addr()` records, you MUST treat a return value from the resolver of `0x00...00` as that record being unset. Failing to do so could result in users accidentally sending funds to the null address if they have configured a resolver in WNS, but not set the resolver record!
 
 Resolving names onchain
 =======================
 
-Solidity libraries for onchain resolution are not yet available, but ENS resolution is straightforward enough it can be done trivially without a library. Contracts may use the following interfaces:
+Solidity libraries for onchain resolution are not yet available, but WNS resolution is straightforward enough it can be done trivially without a library. Contracts may use the following interfaces:
 
 .. code-block:: solidity
 
-    contract ENS {
+    contract WNS {
         function owner(bytes32 node) constant returns (address);
         function resolver(bytes32 node) constant returns (Resolver);
         function ttl(bytes32 node) constant returns (uint64);
@@ -70,21 +70,21 @@ Solidity libraries for onchain resolution are not yet available, but ENS resolut
         function addr(bytes32 node) constant returns (address);
     }
 
-For resolution, only the `resolver()` function in the ENS contract is required; other methods permit looking up owners, and updating ENS from within a contract that owns a name.
+For resolution, only the `resolver()` function in the WNS contract is required; other methods permit looking up owners, and updating WNS from within a contract that owns a name.
 
 With these definitions, looking up a name given its node hash is straightforward:
 
 .. code-block:: solidity
 
     contract MyContract {
-        ENS ens;
+        WNS wns;
 
-        function MyContract(address ensAddress) {
-            ens = ENS(ensAddress);
+        function MyContract(address wnsAddress) {
+            wns = WNS(wnsAddress);
         }
 
         function resolve(bytes32 node) constant returns(address) {
-            var resolver = ens.resolver(node)
+            var resolver = wns.resolver(node)
             return resolver.addr(node);
         }
     }
@@ -94,40 +94,40 @@ While it is possible for a contract to process a human-readable name into a node
 Writing a registrar
 ===================
 
-A registrar in ENS is simply any contract that owns a name, and allocates subdomains of it according to some set of rules defined in the contract code. A trivial first in first served contract is demonstrated below, using the ENS interface definition defined earlier.
+A registrar in WNS is simply any contract that owns a name, and allocates subdomains of it according to some set of rules defined in the contract code. A trivial first in first served contract is demonstrated below, using the WNS interface definition defined earlier.
 
 .. code-block:: solidity
 
     contract FIFSRegistrar {
-        ENS ens;
+        WNS wns;
         bytes32 rootNode;
 
-        function FIFSRegistrar(address ensAddr, bytes32 node) {
-            ens = ENS(ensAddr);
+        function FIFSRegistrar(address wnsAddr, bytes32 node) {
+            wns = WNS(wnsAddr);
             rootNode = node;
         }
 
         function register(bytes32 subnode, address owner) {
             var node = sha3(rootNode, subnode);
-            var currentOwner = ens.owner(node);
+            var currentOwner = wns.owner(node);
 
             if (currentOwner != 0 && currentOwner != msg.sender) throw;
 
-            ens.setSubnodeOwner(rootNode, subnode, owner);
+            wns.setSubnodeOwner(rootNode, subnode, owner);
         }
     }
 
-Interacting with ENS offchain
+Interacting with WNS offchain
 =============================
 
-A Javascript library, ethereum-ens_, is available to facilitate reading and writing ENS from offchain. This section will be updated as libraries for more languages become available.
+A Javascript library, ethereum-ens_, is available to facilitate reading and writing WNS from offchain. This section will be updated as libraries for more languages become available.
 
 Normalising and validating names
 ================================
 
-Before a name can be converted to a node hash using :ref:`namehash`, the name must first be normalised and checked for validity - for instance, converting `fOO.eth` into `foo.eth`, and prohibiting names containing forbidden characters such as underscores. It is crucial that all applications follow the same set of rules for normalisation and validation, as otherwise two users entering the same name on different systems may resolve the same human-readable name into two different ENS names.
+Before a name can be converted to a node hash using :ref:`namehash`, the name must first be normalised and checked for validity - for instance, converting `fOO.eth` into `foo.eth`, and prohibiting names containing forbidden characters such as underscores. It is crucial that all applications follow the same set of rules for normalisation and validation, as otherwise two users entering the same name on different systems may resolve the same human-readable name into two different WNS names.
 
-Applications using ENS and processing human-readable names must follow UTS46_ for normalisation and validation. Processing should be done with non-transitional rules, and with `UseSTD3ASCIIRules=true`.
+Applications using WNS and processing human-readable names must follow UTS46_ for normalisation and validation. Processing should be done with non-transitional rules, and with `UseSTD3ASCIIRules=true`.
 
 The ethereum-ens_ Javascript library incorporates compliant preprocessing into its `validate` and `namehash` functions, so users of this library avoid the need to handle this manually.
 
