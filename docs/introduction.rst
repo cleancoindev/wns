@@ -11,7 +11,7 @@ Overview
 
 The primary goal of WNS is to resolve human-readable names, like 'jacklv.wan', into machine-readable identifiers, including Wanchain addresses and other identifiers. A secondary purpose is to provide metadata about names, such as ABIs for contracts, and whois information for users.
 
-WNS has similar goals to DNS, the Internet's Domain Name Service, but has significantly different architecture, due to the capabilities and constraints provided by the Wanchain blockchain. Like DNS, WNS operates on a system of dot-separated hierarchial names called domains, with the owner of a domain having full control over the distribution of subdomains. 
+WNS has similar goals to DNS, the Internet's Domain Name Service, but has significantly different architecture, due to the capabilities and constraints provided by the blockchain. Like DNS, WNS operates on a system of dot-separated hierarchial names called domains, with the owner of a domain having full control over the distribution of subdomains. 
 
 Top-level domains, like '.wan' and '.test' are owned by smart contracts called registrars, which specify rules governing the allocation of their subdomains. Anyone may, by following the rules imposed by these registrar contracts, obtain ownership of a second-level domain for their own use.
 
