@@ -87,8 +87,8 @@ WNS is deployed on mainnet at TODO: 0x314159265dd8dbb310642f98f50c066173c1259b_,
 
 WNS is also deployed on the testnet at TODO: 0x112234455c3a32fd11230c42e7bccd4a84e02010_. Users may register names under two top level domains:
 
- - .wan, which uses an auction based registrar with the same functionality as the main network, and allows users to keep names indefinitely; see :ref:`auctions`.
- - .test, which allows anyone to claim an unused name for test purposes, which expires after 28 days; see :ref:`fifs`.
+ - .wan, which uses an auction based registrar with the same functionality as the main network, and allows users to keep names indefinitely; see Registrar.sol.
+ - .test, which allows anyone to claim an unused name for test purposes, which expires after 28 days; see TestRegistrar.sol.
 
 
 Resources
