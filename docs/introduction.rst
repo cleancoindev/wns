@@ -9,7 +9,7 @@ WNS can be used to resolve a wide variety of resources. The initial standard for
 Overview
 ========
 
-The primary goal of WNS is to resolve human-readable names, like 'myname.wan', into machine-readable identifiers, including Wanchain addresses and other identifiers. A secondary purpose is to provide metadata about names, such as ABIs for contracts, and whois information for users.
+The primary goal of WNS is to resolve human-readable names, like 'jacklv.wan', into machine-readable identifiers, including Wanchain addresses and other identifiers. A secondary purpose is to provide metadata about names, such as ABIs for contracts, and whois information for users.
 
 WNS has similar goals to DNS, the Internet's Domain Name Service, but has significantly different architecture, due to the capabilities and constraints provided by the Wanchain blockchain. Like DNS, WNS operates on a system of dot-separated hierarchial names called domains, with the owner of a domain having full control over the distribution of subdomains. 
 
