@@ -84,4 +84,19 @@ alternatively, deploy the `HashRegistrar`:
 
 	$ truffle migrate --network dev.auction
 
+Testing all contract by TestRPC:
+
+    $ truffle test
+
+If you want test on testnet, remove all test file except TestIntegrate.js under test directory,
+Then create four account,and deposit the accounts, and unlock them:
+
+    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
+    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
+    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
+    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
+
+make a simple integate test on wanchain testnet:
+    $ truffle test --network testnet
+
 Check the truffle [documentation](http://truffleframework.com/docs/) for more information.
