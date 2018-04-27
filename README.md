@@ -16,7 +16,7 @@ Implementation of the WNS Registry, the central contract used to look up resolve
 ## FIFSRegistrar.sol
 Implementation of a simple first-in-first-served registrar, which issues (sub-)domains to the first account to request them.
 
-## HashRegistrarSimplified.sol
+## Registrar.sol
 Simplified version of the above, with no support for renewals. This is the current proposal for interim registrar of the WNS system until a permanent registrar is decided on.
 
 ## PublicResolver.sol
