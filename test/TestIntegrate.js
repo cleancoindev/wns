@@ -60,12 +60,13 @@ contract('ENS', function (accounts) {
         reverseRegistrar = await ReverseRegistrar.new(wns.address, reverseResolver.address, {from:addrDeploy});
     });
 
-    it('intergrate test for TestRegistrar', async () => {          
+    it('intergrate test for TestRegistrar', async function () {          
+        this.timeout(30*60*1000);
         testRegistrar = await TestRegistrar.new(wns.address, namehash('test'), {from:addrTest});
         console.log("deploying TestRegistrar contract at:" + testRegistrar.address);
 
         console.log("setting domain \'test\' to " + addrDeploy);
-        await wns.setSubnodeOwner('0x0',web3.sha3('test'), testRegistrar.address,{from: addrDeploy, gasPrice: 200000000000, gas:1000000})
+        await wns.setSubnodeOwner('0x0',web3.sha3('test'), testRegistrar.address,{from: addrDeploy})
 
         console.log("prepare process completed.");
     
@@ -73,6 +74,7 @@ contract('ENS', function (accounts) {
         await testRegistrar.register(web3.sha3('myname'), addrTest, {from: addrTest});
 
         mynameTestOwner = await wns.owner(namehash('myname.test'));
+        assert.equal(await mynameTestOwner, addrTest);
         console.log("name myname.test owner is: " + mynameTestOwner);
         await wns.setResolver(namehash('myname.test'), publicResolver.address, {from: addrTest});
 
@@ -80,7 +82,6 @@ contract('ENS', function (accounts) {
         console.log("resolver will setting myname.test to address: " + addrTest);
         await publicResolver.setAddr(namehash('myname.test'), addrTest, {from: addrTest});
         console.log("get myname.test address: " + await getAddr("myname.test"));
-        //assert.equal(await wns.owner(0), '0x77E00Ae5BFD8ba7Fc476Cf28448A9A521C8bf2de')
 
         //set sub node abcde.myname.test to addr
         console.log("setting sub node foo.myname.test to :" + addrAuction);
@@ -108,7 +109,7 @@ contract('ENS', function (accounts) {
         await awaitSleep(100*1000);
 
         /* force time update when using ganache */
-        await web3.eth.sendTransaction({from:addrTest, to: addrDeploy, value: web3.toWei(1)});
+        await web3.eth.sendTransaction({from:addrTest, to: addrDeploy, value: web3.toWei(1), gasPrice: 200000000000});
 
         
         console.log("prepare process completed.");
