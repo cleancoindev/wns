@@ -122,7 +122,6 @@ var deployReverseRegistrar = function(){
 
 var delegateTLD = function(){
 // transfer first level node to newly created registrar
-    wns.setSubnodeOwner('0x0',web3.sha3('test'), testRegistrar.address, {from:eth.accounts[0], gasPrice: 200000000000, gas:1000000});
     wns.setSubnodeOwner('0x0',web3.sha3('wan'), auctionRegistrar.address, {from:eth.accounts[0], gasPrice: 200000000000, gas:1000000});
 };
 
