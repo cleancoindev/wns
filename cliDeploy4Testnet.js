@@ -53,7 +53,7 @@ var deployWNS = function(){
              console.log('WNS Registry Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
         }
     });
-}
+};
 
 // deploy  registrars and resolvers
 var deployRegistrar = function (){
@@ -120,11 +120,11 @@ var deployRegistrar = function (){
         }
     });
 
-}
+};
 
 var deployReverseRegistrar = function(){
     var reverseRegistrarContract = web3.eth.contract(ABIReverseRegistrar);
-    auctionRegistrar = reverseRegistrarContract.new(
+    reverseRegistrar = reverseRegistrarContract.new(
         wns.address,
         reverseResolver.address,
         {from: web3.eth.accounts[0],
@@ -137,17 +137,17 @@ var deployReverseRegistrar = function(){
              console.log('reverseRegistrar Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
         }
     });    
-}
+};
 
 var delegateTLD = function(){
 // transfer first level node to newly created registrar
     wns.setSubnodeOwner('0x0',web3.sha3('test'), testRegistrar.address, {from:eth.accounts[0], gasPrice: 200000000000, gas:1000000});
     wns.setSubnodeOwner('0x0',web3.sha3('wan'), auctionRegistrar.address, {from:eth.accounts[0], gasPrice: 200000000000, gas:1000000});
-}
+};
 
 
 // testing every thing is right
-    testRegistrar.register(web3.sha3('myname'), eth.accounts[0], {from: eth.accounts[0], gasPrice:200000000000, gas:1000000})
+    testRegistrar.register(web3.sha3('myname'), eth.accounts[0], {from: eth.accounts[0], gasPrice:200000000000, gas:1000000});
     wns.setResolver(namehash('myname.test'), publicResolver.address, {from: eth.accounts[0], gasPrice:200000000000});
     publicResolver.setAddr(namehash('myname.test'), eth.accounts[0], {from: eth.accounts[0], gasPrice:200000000000});
     publicResolver.addr(namehash('myname.test'));

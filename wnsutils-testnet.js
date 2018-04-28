@@ -26,7 +26,7 @@ var ABIDeed = [{"constant":true,"inputs":[],"name":"creationDate","outputs":[{"n
 
 
 var wnsContract = web3.eth.contract(ABIWNSRegistry);
-var wns = wnsContract.at('0x37e22853510018834c959bf536b90c96f2e1bf9c');
+var wns = wnsContract.at('0xf1f752297479db573f09308625319bd6ce08be9c');
 
 var auctionRegistrarContract = web3.eth.contract(ABIAuctionRegistrar);
 var wanRegistrar = auctionRegistrarContract.at(wns.owner(namehash('wan')));
@@ -37,13 +37,13 @@ var testRegistrarContract = web3.eth.contract(ABITestRegistrar);
 var testRegistrar = testRegistrarContract.at(wns.owner(namehash('test')));
 
 var resolverContract = web3.eth.contract(ABIPublicResolver);
-var publicResolver = resolverContract.at('0xc9e0b8d12aa894b88d7437495100fabd8efc529b');
+var publicResolver = resolverContract.at('0x19fecbb41e12832c056262abd966a5bf66b72562');
 
 var reverseRegistrarContract = web3.eth.contract(ABIReverseRegistrar);
 var reverseRegistrar = reverseRegistrarContract.at(wns.owner(namehash('addr.reverse')));
 
 function getAddr(name) {
-  var node = namehash(name)
+  var node = namehash(name);
   var resolverAddress = wns.resolver(node);
   if (resolverAddress === '0x0000000000000000000000000000000000000000') {
     return resolverAddress;
@@ -52,7 +52,7 @@ function getAddr(name) {
 }
 
 function getContent(name) {
-  var node = namehash(name)
+  var node = namehash(name);
   var resolverAddress = wns.resolver(node);
   if (resolverAddress === '0x0000000000000000000000000000000000000000') {
     return "0x0000000000000000000000000000000000000000000000000000000000000000";
