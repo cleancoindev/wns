@@ -3,7 +3,7 @@
 
 Implementations for registrars and local resolvers for the Wanchain Name Service.
 
-For documentation of the WNS system, see [doc](https://github.com/wanchain/wns/tree/master/doc).
+For documentation of the WNS system, see [doc](https://github.com/wanchain/wns/tree/master/docs).
 
 To run unit tests, clone this repository, and run:
 
