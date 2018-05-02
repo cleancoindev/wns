@@ -288,7 +288,7 @@ contract Registrar {
      * @param unhashedName An invalid name to search for in the registry.
      */
     function invalidateName(string unhashedName) public inState(keccak256(unhashedName), Mode.Owned) {
-        require(strlen(unhashedName) <= 6);
+        require(strlen(unhashedName) < 6);
         bytes32 hash = keccak256(unhashedName);
 
         Entry storage h = _entries[hash];
