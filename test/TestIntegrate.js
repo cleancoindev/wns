@@ -93,7 +93,8 @@ contract('ENS', function (accounts) {
     });    
     
     
-    it('integrate test for AuctionRegistrar', async function ()  {  
+    it('integrate test for AuctionRegistrar', async function ()  {
+        // all await sleep time according to mock contract
         this.timeout(60*60*1000);
 
         console.log("deploying AuctionRegistrar contract......")
