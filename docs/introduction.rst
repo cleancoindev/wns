@@ -83,7 +83,7 @@ A sample implementation in Python is provided below.
 WNS on Wanchain
 ===============
 
-WNS is deployed on mainnet at TODO: 0x314159265dd8dbb310642f98f50c066173c1259b_, where users may register names under the wan TLD, which uses an auction based registrar.
+WNS is deployed on mainnet at TODO: ----------------------------------, where users may register names under the wan TLD, which uses an auction based registrar.
 
 WNS is also deployed on the testnet at TODO: 0x112234455c3a32fd11230c42e7bccd4a84e02010_. Users may register names under two top level domains:
 
