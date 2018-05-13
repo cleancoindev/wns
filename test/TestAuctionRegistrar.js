@@ -180,7 +180,7 @@ describe('SimpleHashRegistrar', function() {
     	await registrar.newBid(bid, {from: accounts[0], value: 1e15 - 1}).catch((error) => { utils.ensureException(error); });
     });
 
-    it('concludes auctions', async () => {
+    it('concludes auctions', async function() {
 		this.timeout(5000);
 		var bidData = [
 			// A regular bid
@@ -621,12 +621,12 @@ describe('SimpleHashRegistrar', function() {
     	balance = await web3.eth.getBalance(bid.account);
     	var spentFee = Math.floor(web3.fromWei(bid.startingBalance - balance.toFixed(), 'finney'));
     	console.log('\t Bidder #'+ bid.salt, bid.description, 'spent:', spentFee, 'finney;');
-    	assert.equal(spentFee, 5);
+    	assert.equal(spentFee, 50);
 
     	balance = await web3.eth.getBalance(invalidator.account);
 		let fee = Math.floor(web3.fromWei(balance.toFixed() - invalidator.startingBalance, 'finney'));
 		// console.log('\t Invalidator got: ', fee, 'finney');
-		assert.equal(fee, 4);
+		assert.equal(fee, 49);
 		owner = await ens.owner(nameDotEth);
 		assert.equal(owner, 0);
 		await registrar.startAuction(web3.sha3('name'), {from: accounts[0]});
