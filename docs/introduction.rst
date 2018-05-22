@@ -83,9 +83,9 @@ A sample implementation in Python is provided below.
 WNS on Wanchain
 ===============
 
-WNS is deployed on mainnet at 0xee8d418fd33e69782015ea4313dfd8eb7b1b91ce_, where users may register names under the wan TLD, which uses an auction based registrar.
+WNS is deployed on mainnet at 0xee8d418fd33e69782015ea4313dfd8eb7b1b91ce, where users may register names under the wan TLD, which uses an auction based registrar.
 
-WNS is also deployed on the testnet at 0xe85cfdf43a0db4aa0ec054a57451af7c73d4625b_. Users may register names under two top level domains:
+WNS is also deployed on the testnet at 0xe85cfdf43a0db4aa0ec054a57451af7c73d4625b. Users may register names under two top level domains:
 
  - .wan, which uses an auction based registrar with the same functionality as the main network, and allows users to keep names indefinitely; see Registrar.sol.
  - .test, which allows anyone to claim an unused name for test purposes, which expires after 28 days; see TestRegistrar.sol.
