@@ -329,7 +329,7 @@ Reverse name resolution
 
 WNS also supports reverse resolution of Wanchain addresses. This allows an account (contract or external) to associate metadata with itself, such as its canonical name - 'Wanchain caller ID' if you will.
 
-Reverse records are in the format `<wanchain address>.addr.reverse` - for instance, the official registry would have its reverse records at `314159265dd8dbb310642f98f50c066173c1259b.addr.reverse`.
+Reverse records are in the format `<wanchain address>.addr.reverse` - for instance, the official registry would have its reverse records at `ee8d418fd33e69782015ea4313dfd8eb7b1b91ce.addr.reverse`.
 
 `addr.reverse` has a registrar with `claim`, `claimWithResolver`, and `setName` functions.
 

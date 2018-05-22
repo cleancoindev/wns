@@ -24,8 +24,7 @@ var ABIReverseResolver = [{"constant":true,"inputs":[{"name":"","type":"bytes32"
 var ABIDeed = [{"constant":true,"inputs":[],"name":"creationDate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"destroyDeed","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"setOwner","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"registrar","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"value","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"previousOwner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newValue","type":"uint256"},{"name":"throwOnFailure","type":"bool"}],"name":"setBalance","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"refundRatio","type":"uint256"}],"name":"closeDeed","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newRegistrar","type":"address"}],"name":"setRegistrar","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_owner","type":"address"}],"payable":true,"stateMutability":"payable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newOwner","type":"address"}],"name":"OwnerChanged","type":"event"},{"anonymous":false,"inputs":[],"name":"DeedClosed","type":"event"}];
 
 var wnsContract = web3.eth.contract(ABIWNSRegistry);
-// TODO: replace contract  address with mainnet contract address
-var wns = wnsContract.at('0xf1f752297479db573f09308625319bd6ce08be9c');
+var wns = wnsContract.at('0xee8d418fd33e69782015ea4313dfd8eb7b1b91ce');
 
 
 var auctionRegistrarContract = web3.eth.contract(ABIAuctionRegistrar);
@@ -34,8 +33,7 @@ var wanRegistrar = auctionRegistrarContract.at(wns.owner(namehash('wan')));
 var deedContract = web3.eth.contract(ABIDeed);
 
 var resolverContract = web3.eth.contract(ABIPublicResolver);
-// TODO: replace contract address with mainnet address
-var publicResolver = resolverContract.at('0x19fecbb41e12832c056262abd966a5bf66b72562');
+var publicResolver = resolverContract.at('0x330b6f07f6ace581fc4321ce7f401aa8edb5bfad');
 
 var reverseRegistrarContract = web3.eth.contract(ABIReverseRegistrar);
 var reverseRegistrar = reverseRegistrarContract.at(wns.owner(namehash('addr.reverse')));
