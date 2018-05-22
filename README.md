@@ -92,9 +92,9 @@ If you want test on testnet, remove all test file except TestIntegrate.js under 
 Then create four account,and deposit the accounts, and unlock them:
 
     $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
-    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
-    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
-    $ personal.unlockAccount(eth.accounts[0], 'yourpasswd', 999999);
+    $ personal.unlockAccount(eth.accounts[1], 'yourpasswd', 999999);
+    $ personal.unlockAccount(eth.accounts[2], 'yourpasswd', 999999);
+    $ personal.unlockAccount(eth.accounts[3], 'yourpasswd', 999999);
 
 make a simple integate test on wanchain testnet:
     $ truffle test --network testnet
