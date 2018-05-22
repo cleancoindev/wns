@@ -26,7 +26,7 @@ var ABIDeed = [{"constant":true,"inputs":[],"name":"creationDate","outputs":[{"n
 
 
 var wnsContract = web3.eth.contract(ABIWNSRegistry);
-var wns = wnsContract.at('0xf1f752297479db573f09308625319bd6ce08be9c');
+var wns = wnsContract.at('0xe85cfdf43a0db4aa0ec054a57451af7c73d4625b');
 
 var auctionRegistrarContract = web3.eth.contract(ABIAuctionRegistrar);
 var wanRegistrar = auctionRegistrarContract.at(wns.owner(namehash('wan')));
@@ -37,7 +37,7 @@ var testRegistrarContract = web3.eth.contract(ABITestRegistrar);
 var testRegistrar = testRegistrarContract.at(wns.owner(namehash('test')));
 
 var resolverContract = web3.eth.contract(ABIPublicResolver);
-var publicResolver = resolverContract.at('0x19fecbb41e12832c056262abd966a5bf66b72562');
+var publicResolver = resolverContract.at('0x3f5ad0ab415d451bcec48cfcbd61aee126687cd4');
 
 var reverseRegistrarContract = web3.eth.contract(ABIReverseRegistrar);
 var reverseRegistrar = reverseRegistrarContract.at(wns.owner(namehash('addr.reverse')));
